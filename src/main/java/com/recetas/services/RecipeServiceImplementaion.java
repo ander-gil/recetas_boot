@@ -1,0 +1,79 @@
+package com.recetas.services;
+
+import com.recetas.model.Recipe;
+import com.recetas.model.User;
+import com.recetas.repository.RecipeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class RecipeServiceImplementaion implements RecipeService{
+
+    @Autowired
+    private RecipeRepository  recipeRepository;
+
+
+    @Override
+    public Recipe cretaeRecipe(Recipe recipe, User user) {
+        Recipe createdRecipe = new Recipe();
+        createdRecipe.setTitle(recipe.getTitle());
+        createdRecipe.setImage(recipe.getImage());
+        createdRecipe.setDescription(recipe.getDescription());
+        createdRecipe.setDescription(recipe.getDescription());
+        createdRecipe.setUser(user);
+        createdRecipe.setVegetarian(recipe.isVegetarian());
+        createdRecipe.setCreatedAt(LocalDateTime.now());
+        return recipeRepository.save(createdRecipe);
+    }
+
+    @Override
+    public Recipe findRecipeById(Long id) throws Exception {
+       Optional<Recipe> opt =  recipeRepository.findById(id);
+       if(opt.isPresent()){
+           return opt.get();
+       }
+        throw  new Exception("receta no encontrada");
+    }
+
+    @Override
+    public void deleteRecipe(Long id) throws Exception {
+         findRecipeById(id);
+         recipeRepository.deleteById(id);
+    }
+
+    @Override
+    public Recipe updateRecipe(Recipe recipe, Long id) throws Exception {
+        Recipe oldRecipe = findRecipeById(id);
+        if(recipe.getTitle()!=null){
+            oldRecipe.setTitle(recipe.getTitle());
+        }
+        if(recipe.getImage()!=null){
+            oldRecipe.setTitle(recipe.getTitle());
+        }
+        if(recipe.getDescription()!=null){
+            oldRecipe.setDescription(recipe.getDescription());
+        }
+        return recipeRepository.save(oldRecipe);
+    }
+
+    @Override
+    public List<Recipe> findAllRecipe() {
+        return recipeRepository.findAll();
+    }
+
+    @Override
+    public Recipe likeRecipe(Long recipeId, User user) throws Exception {
+        Recipe recipe = findRecipeById(recipeId);
+        if(recipe.getLikes().contains(user.getId())){
+            recipe.getLikes().remove(user.getId());
+        }else{
+            recipe.getLikes().add(user.getId());
+        }
+        return recipeRepository.save(recipe);
+    }
+
+}

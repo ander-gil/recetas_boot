@@ -5,9 +5,12 @@ import com.recetas.model.User;
 import com.recetas.services.RecipeService;
 import com.recetas.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -19,9 +22,9 @@ public class RecipeController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/user/{userId}")
-    public Recipe createRecipe(@RequestBody Recipe recipe, @PathVariable Long userId)throws Exception{
-        User user = userService.findUserById(userId);
+    @PostMapping()
+    public Recipe createRecipe(@RequestBody Recipe recipe, @RequestHeader("Authorization") String jwt)throws Exception{
+        User user = userService.findUserByJwt(jwt);
        Recipe createdRecipe = recipeService.cretaeRecipe(recipe, user);
        return createdRecipe;
     }
@@ -32,9 +35,14 @@ public class RecipeController {
     }
 
     @DeleteMapping("/{recipeId}")
-    public String deleteRecipes(@PathVariable Long recipeId)throws Exception{
-         recipeService.deleteRecipe(recipeId);
-         return "receta eliminada con exito";
+    public ResponseEntity<Void> deleteRecipes(@PathVariable Long recipeId) {
+        try {
+            recipeService.deleteRecipe(recipeId);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (Exception e) {
+            // Manejo de excepciones, devolviendo un estado de error genérico
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
@@ -43,9 +51,9 @@ public class RecipeController {
         return recipeUpdate;
     }
 
-    @PutMapping("/{id}/user/{userId}")
-    public Recipe likeRecipe(@PathVariable Long id, @PathVariable Long userId)throws Exception{
-        User user = userService.findUserById(userId);
+    @PutMapping("/{id}/like")
+    public Recipe likeRecipe(@PathVariable Long id, @RequestHeader("Authorization") String jwt)throws Exception{
+        User user = userService.findUserByJwt(jwt);
         Recipe recipeUpdate = recipeService.likeRecipe(id,user);
         return recipeUpdate;
     }

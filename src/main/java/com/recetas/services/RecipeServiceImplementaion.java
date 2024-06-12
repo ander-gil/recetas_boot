@@ -52,7 +52,7 @@ public class RecipeServiceImplementaion implements RecipeService{
             oldRecipe.setTitle(recipe.getTitle());
         }
         if(recipe.getImage()!=null){
-            oldRecipe.setTitle(recipe.getTitle());
+            oldRecipe.setImage(recipe.getImage());
         }
         if(recipe.getDescription()!=null){
             oldRecipe.setDescription(recipe.getDescription());
